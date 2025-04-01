@@ -85,6 +85,12 @@ SPDX-License-Identifier: Apache-2.0
 			public function onApplicationComplete(event:Event):void {
 				instance = this;
 				document.title = "TankiMapCV";
+				var favicon:Element = document.createElement("link");
+				favicon.setAttribute("rel","icon");
+				favicon.setAttribute("type","image/png");
+				favicon.setAttribute("href","./_assets/favicon.png");
+				document.head.appendChild(favicon);
+
 				window.addEventListener(KeyboardEvent.KEY_DOWN,this.onKeyDown);
 				browseMapButton.html = underlineChar(browseMapButton.html,"o");
 				showKdNodesCheckbox.selected = localStorage.getItem("showKdNodes");
