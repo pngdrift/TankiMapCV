@@ -34,41 +34,7 @@ SPDX-License-Identifier: Apache-2.0
 		</js:View>
 	</js:initialView>
 
-	<fx:Style>
-		@namespace js "library://ns.apache.org/royale/basic";
-
-		.Application {
-			background-color: #5F6978;
-		}
-
-		.TextButton {
-			font-family: "Tahoma";
-            font-size: 14px;
-            color: #FFFFFF;
-            background: linear-gradient(to bottom, #555, #222);
-            border: 1px solid #000;
-            text-shadow: 1px 1px 0px #000;
-            box-shadow: inset 1px 1px 3px rgba(255, 255, 255, 0.2), 0 0 3px rgba(0, 0, 0, 0.5);
-        }
-
-        .TextButton:active {
-            background: linear-gradient(to bottom, #222, #555);
-        }
-		
-		.CheckBox,
-		.Label {
-        	color: #FFFFFF;
-			font-family: "Tahoma";
-       	 	text-shadow: 1px 1px 4px rgba(0, 0, 0, 1);
-			user-select: none;
-    	}
-
-		.CheckBox {
-			font-size: 13px;
-			padding-left: 4px;
-		}
-
-	</fx:Style>
+	<fx:Style source="./_assets/style.css"/>	
 
 	<fx:Script>
 		<![CDATA[
