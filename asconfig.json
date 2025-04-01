@@ -1,0 +1,16 @@
+{
+	"config": "royale",
+	"compilerOptions": {
+		"targets": [
+			"JSRoyale"
+		],
+		"source-path": [
+			"src"
+		],
+		"js-library-path": [
+			"libs"
+		],
+		"source-map": true
+	},
+	"mainClass": "TankiMapCV"
+}

@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright 2025 pngdrift
+SPDX-License-Identifier: Apache-2.0
+-->
+<js:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
+	xmlns:js="library://ns.apache.org/royale/basic"
+	applicationComplete="onApplicationComplete(event)">
+
+	<fx:Declarations>
+		<js:FileProxy id="mapFileProxy" modelChanged="modelChangedHandler(event)">
+			<js:beads>
+				<js:FileBrowserWithFilter id="mapBrowser" filter=".xml"/>
+				<js:FileLoader id="mapLoader"/>
+			</js:beads>
+		</js:FileProxy>
+		<js:LocalStorage id="localStorage"/>
+	</fx:Declarations>
+
+	<js:initialView>
+		<js:View>
+			<js:VGroup>
+				<js:HGroup>
+					<js:TextButton html="Browse map" click="mapBrowser.browse()" id="browseMapButton"/>
+					<js:CheckBox text="Show CollisionKDNodes" change="onShowKDChanged()" id="showKdNodesCheckbox"/>
+					<js:CheckBox text="Gray collision textures" change="onGrayTexturesChanged()" id="grayTexturesCheckbox"/>
+				</js:HGroup>
+				<js:Label text="" id="mapIdLabel"/>
+				<js:Label text="" id="cameraPosLabel"/>
+				<js:Label text="" id="maxIndicesLabel"/>
+				<js:Label text="" id="selectedNodeIndicesLabel"/>
+			</js:VGroup>
+			<js:TextButton text="GitHub" click="window.open('https://github.com/pngdrift/TankiMapCV')" style="position:absolute; right:0px;"/>
+		</js:View>
+	</js:initialView>
+
+	<fx:Style>
+		@namespace js "library://ns.apache.org/royale/basic";
+
+		.Application {
+			background-color: #5F6978;
+		}
+
+		.TextButton {
+			font-family: "Tahoma";
+            font-size: 14px;
+            color: #FFFFFF;
+            background: linear-gradient(to bottom, #555, #222);
+            border: 1px solid #000;
+            text-shadow: 1px 1px 0px #000;
+            box-shadow: inset 1px 1px 3px rgba(255, 255, 255, 0.2), 0 0 3px rgba(0, 0, 0, 0.5);
+        }
+
+        .TextButton:active {
+            background: linear-gradient(to bottom, #222, #555);
+        }
+		
+		.CheckBox,
+		.Label {
+        	color: #FFFFFF;
+			font-family: "Tahoma";
+       	 	text-shadow: 1px 1px 4px rgba(0, 0, 0, 1);
+			user-select: none;
+    	}
+
+		.CheckBox {
+			font-size: 13px;
+			padding-left: 4px;
+		}
+
+	</fx:Style>
+
+	<fx:Script>
+		<![CDATA[
+			import alternativa.physics.collision.*;
+			import alternativa.physics.collision.types.BoundBox;
+			import org.apache.royale.events.Event;
+			import org.apache.royale.file.beads.FileModel;
+			import org.apache.royale.html.SimpleAlert;
+			
+			public static var instance:TankiMapCV;
+			
+			private var kdNodesVisual:KdNodesVisualization = new KdNodesVisualization();
+			
+			public function onApplicationComplete(event:Event):void {
+				instance = this;
+				document.title = "TankiMapCV";
+				window.addEventListener(KeyboardEvent.KEY_DOWN,this.onKeyDown);
+				browseMapButton.html = underlineChar(browseMapButton.html,"o");
+				showKdNodesCheckbox.selected = localStorage.getItem("showKdNodes");
+				grayTexturesCheckbox.selected = localStorage.getItem("grayTextures");
+			}
+			
+			private static function underlineChar(str:String,char:String):String {
+				return str.substr(0,str.indexOf(char)) + "<u>" + char + "</u>" + str.substr(str.indexOf("o") + 1);
+			}
+			
+			private function onKeyDown(event:KeyboardEvent):void {
+				switch(event.code) {
+					case "KeyO":
+						this.mapBrowser.browse();
+						break;
+				}
+			}
+			
+			protected function modelChangedHandler(event:Event):void {
+				MapView.initScene();
+				mapFileProxy.model.addEventListener("blobChanged",blobChangedHandler);
+				mapLoader.load();
+			}
+			
+			private function blobChangedHandler(event:Event):void {
+				var fileModel:FileModel = mapFileProxy.model as FileModel;
+				var mapXml:XML;
+				try {
+					mapXml = new XML(fileModel.blob.toString("utf-8"));
+					if(mapXml.name() != "map") {
+						throw new Error("Loaded file isn't Tanki map");
+					}
+				}
+				catch(err:Error) {
+					SimpleAlert.show(err.message,this);
+					return;
+				}
+				var scene:* = MapView.scene;
+				for(var i:int = scene.children.length - 1; i >= 0; i--) {
+					var obj:* = scene.children[i];
+					var objName:String = obj.name;
+					if(objName.startsWith(("collision-"))) {
+						scene.remove(obj);
+					}
+				}
+				mapIdLabel.text = "Map file: " + fileModel.name;
+				var collisionPrimitives:Vector.<CollisionPrimitive> = CollisionGeometryUtils.parseAndAdd(mapXml);
+				var kdTree:CollisionKdTree = new CollisionKdTree();
+				kdTree.createTree(collisionPrimitives);
+				kdNodesVisual.setRootNode(kdTree.rootNode);
+				kdNodesVisual.visible = showKdNodesCheckbox.selected;
+				onGrayTexturesChanged();
+				var mapBounds:BoundBox = kdTree.rootNode.boundBox;
+				var camera:* = MapView.camera;
+				camera.position.x = -mapBounds.minX;
+				camera.position.y = mapBounds.minZ + 3000;
+				camera.position.z = mapBounds.maxY;
+				camera["lookAt"](new THREE.Vector3(-(mapBounds.minX + mapBounds.maxX) / 2),mapBounds.minZ,(mapBounds.minY + mapBounds.maxY) / 2);
+			}
+			
+			private function onShowKDChanged():void {
+				var value:Boolean = showKdNodesCheckbox.selected;
+				kdNodesVisual.visible = value;
+				if(value) {
+					localStorage.setItem("showKdNodes","true");
+				}
+				else {
+					localStorage.removeItem("showKdNodes");
+				}
+			}
+			
+			private function onGrayTexturesChanged():void {
+				var value:Boolean = grayTexturesCheckbox.selected;
+				var scene:* = MapView.scene;
+				for(var i:int = scene.children.length - 1; i >= 0; i--) {
+					var obj:* = scene.children[i];
+					var objName:String = obj.name;
+					if(objName.startsWith(("collision-"))) {
+						if(value) {
+							CollisionGeometryUtils.setGrayMaterial(obj);
+						}
+						else {
+							CollisionGeometryUtils.setColorMaterial(obj);
+						}
+					}
+				}
+				if(value) {
+					localStorage.setItem("grayTextures","true");
+				}
+				else {
+					localStorage.removeItem("grayTextures");
+				}
+			}
+		]]>
+	</fx:Script>
+
+	<js:valuesImpl>
+		<js:SimpleCSSValuesImpl/>
+	</js:valuesImpl>
+
+</js:Application>
