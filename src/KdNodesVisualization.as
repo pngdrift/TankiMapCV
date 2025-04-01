@@ -54,7 +54,7 @@ package {
                             "color": getColor(node.indices.length),
                             "transparent": true,
                             "opacity": Math.min(0.7,node.indices.length / 200) + 0.1,
-                            "emissive": new THREE.Color()["setHex"](0)
+                            "emissive": new THREE.Color().setHex(0)
                         });
                 var box:* = new THREE.Mesh(new THREE.BoxGeometry(sizeX,sizeZ,sizeY),material);
                 box.indices = node.indices.length;
@@ -81,7 +81,7 @@ package {
             while(group.children.length > 0) {
                 group.remove(group.children[0]);
             }
-            group["removeFromParent"]();
+            group.removeFromParent();
             nodes.length = 0;
         }
     }

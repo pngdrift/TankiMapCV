@@ -81,13 +81,13 @@ package {
               break;
             case COLLISION_TRIANGLE:
               geometry = new THREE.BufferGeometry();
-              geometry["setFromPoints"]([
+              geometry.setFromPoints([
                     new THREE.Vector3(-v0.x,v0.z,v0.y),
                     new THREE.Vector3(-v1.x,v1.z,v1.y),
                     new THREE.Vector3(-v2.x,v2.z,v2.y),
                   ]);
-              geometry["setAttribute"]("uv",new THREE.BufferAttribute(new Float32Array([0,0,1,0,0,1]),2));
-              geometry["computeVertexNormals"]();
+              geometry.setAttribute("uv",new THREE.BufferAttribute(new Float32Array([0,0,1,0,0,1]),2));
+              geometry.computeVertexNormals();
               material = triangleMaterial;
               break;
           }
@@ -132,10 +132,10 @@ package {
       dummy.position.z = position.y;
       dummy.rotation.copy(new THREE.Euler(-rotation.x,rotation.z,rotation.y,"YZX"));
       if(needRotate) {
-        dummy["rotateX"](-Math.PI / 2);
+        dummy.rotateX(-Math.PI / 2);
       }
-      dummy["updateMatrix"]();
-      instanceMesh["setMatrixAt"](index,dummy.matrix);
+      dummy.updateMatrix();
+      instanceMesh.setMatrixAt(index,dummy.matrix);
     }
 
     private static var planeMaterial:*;
@@ -215,19 +215,19 @@ package {
     }
 
     public static function setGrayMaterial(mesh:*):void {
-      mesh["material"] = mesh.name == COLLISION_TRIANGLE ? grayTriangleMaterial : grayMaterial;
+      mesh.material = mesh.name == COLLISION_TRIANGLE ? grayTriangleMaterial : grayMaterial;
     }
 
     public static function setColorMaterial(mesh:*):void {
       switch(mesh.name) {
         case COLLISION_PLANE:
-          mesh["material"] = planeMaterial;
+          mesh.material = planeMaterial;
           break;
         case COLLISION_BOX:
-          mesh["material"] = boxMaterial;
+          mesh.material = boxMaterial;
           break;
         case COLLISION_TRIANGLE:
-          mesh["material"] = triangleMaterial;
+          mesh.material = triangleMaterial;
           break;
       }
     }

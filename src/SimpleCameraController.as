@@ -44,11 +44,11 @@ package {
             var deltaY:Number = event.clientY - lastMouseY;
             lastMouseX = event.clientX;
             lastMouseY = event.clientY;
-            euler["setFromQuaternion"](camera["quaternion"]);
+            euler.setFromQuaternion(camera.quaternion);
             euler.y -= deltaX * mouseSensitivity;
             euler.x -= deltaY * mouseSensitivity;
             euler.x = Math.max(-pitchLimit,Math.min(pitchLimit,euler.x));
-            camera["quaternion"]["setFromEuler"](euler);
+            camera.quaternion.setFromEuler(euler);
         }
 
         private static const movementSpeed:Number = 3000;
@@ -66,26 +66,24 @@ package {
             }
 
             var direction:* = new THREE.Vector3();
-            camera["getWorldDirection"](direction);
+            camera.getWorldDirection(direction);
 
             if(keys["KeyW"]) {
-                camera.position.add(direction.clone()["multiplyScalar"](speed));
+                camera.position.add(direction.clone().multiplyScalar(speed));
             }
             if(keys["KeyS"]) {
-                camera.position.add(direction.clone()["multiplyScalar"](-speed));
+                camera.position.add(direction.clone().multiplyScalar(-speed));
             }
 
             var right:* = direction.clone();
             right.cross(new THREE.Vector3(0,1,0)).normalize();
             if(keys["KeyA"]) {
-                camera.position.add(right.clone()["multiplyScalar"](-speed));
+                camera.position.add(right.clone().multiplyScalar(-speed));
             }
             if(keys["KeyD"]) {
-                camera.position.add(right.clone()["multiplyScalar"](speed));
+                camera.position.add(right.clone().multiplyScalar(speed));
             }
 
-            var up:* = direction.clone();
-            up.cross(new THREE.Vector3(0,0,1)).normalize();
             if(keys["KeyQ"]) {
                 camera.position.y -= speed;
             }
@@ -93,7 +91,7 @@ package {
                 camera.position.y += speed;
             }
 
-            euler["setFromQuaternion"](camera["quaternion"]);
+            euler.setFromQuaternion(camera.quaternion);
 
             if(keys["ArrowLeft"]) {
                 euler.y += rotSpeed;
@@ -110,7 +108,7 @@ package {
             }
             euler.x = Math.max(-pitchLimit,Math.min(pitchLimit,euler.x));
 
-            camera["quaternion"]["setFromEuler"](euler);
+            camera.quaternion.setFromEuler(euler);
         }
     }
 }

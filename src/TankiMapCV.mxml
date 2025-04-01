@@ -114,7 +114,7 @@ SPDX-License-Identifier: Apache-2.0
 				camera.position.x = -mapBounds.minX;
 				camera.position.y = mapBounds.minZ + 3000;
 				camera.position.z = mapBounds.maxY;
-				camera["lookAt"](new THREE.Vector3(-(mapBounds.minX + mapBounds.maxX) / 2),mapBounds.minZ,(mapBounds.minY + mapBounds.maxY) / 2);
+				camera.lookAt(new THREE.Vector3(-(mapBounds.minX + mapBounds.maxX) / 2),mapBounds.minZ,(mapBounds.minY + mapBounds.maxY) / 2);
 			}
 			
 			private function onShowKDChanged():void {

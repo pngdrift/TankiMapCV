@@ -10,6 +10,7 @@
 		"js-library-path": [
 			"libs"
 		],
+		"js-dynamic-access-unknown-members": true,
 		"source-map": true
 	},
 	"mainClass": "TankiMapCV"

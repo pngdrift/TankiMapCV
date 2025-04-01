@@ -21,7 +21,7 @@ package {
 			scene = new THREE.Scene();
 
 			var skyLoader:* = new THREE.CubeTextureLoader();
-			skyLoader["setPath"]("https://raw.githubusercontent.com/terminal-cs/TO-assets/main/Battle/skyboxes/skybox18/");
+			skyLoader.setPath("https://raw.githubusercontent.com/terminal-cs/TO-assets/main/Battle/skyboxes/skybox18/");
 			scene.background = skyLoader.load([
 						"01.jpg","03.jpg",
 						"05.jpg","06.jpg",
@@ -37,12 +37,12 @@ package {
 
 			var renderer:* = new THREE.WebGLRenderer();
 			renderer.setSize(window.innerWidth,window.innerHeight);
-			document.body.appendChild(renderer["domElement"]);
+			document.body.appendChild(renderer.domElement);
 
 			window.addEventListener("resize",function():void {
-					camera["aspect"] = window.innerWidth / window.innerHeight;
-					camera["updateProjectionMatrix"]();
-					renderer["setSize"](window.innerWidth,window.innerHeight);
+					camera.aspect = window.innerWidth / window.innerHeight;
+					camera.updateProjectionMatrix();
+					renderer.setSize(window.innerWidth,window.innerHeight);
 				},false);
 
 			var cameraController:SimpleCameraController = new SimpleCameraController(camera);
@@ -66,38 +66,38 @@ package {
 
 			var clock:* = new THREE.Clock();
 			var previousTime:Number = 0;
-			renderer["setAnimationLoop"](function():void {
-					var elapsedTime:Number = clock["getElapsedTime"]();
+			renderer.setAnimationLoop(function():void {
+					var elapsedTime:Number = clock.getElapsedTime();
 					var deltaTime:Number = elapsedTime - previousTime;
 					previousTime = elapsedTime;
 
-					raycaster["setFromCamera"](pointer,camera);
+					raycaster.setFromCamera(pointer,camera);
 
 					var kdNodesGroup:* = KdNodesVisualization.group;
 					if(kdNodesGroup && kdNodesGroup.children) {
-						var intersects:* = raycaster["intersectObjects"](kdNodesGroup.children,false);
+						var intersects:* = raycaster.intersectObjects(kdNodesGroup.children,false);
 						if(intersects.length > 0) {
 							if(intersectedNode != intersects[0].object) {
 								if(intersectedNode) {
 									intersectedNode.material.opacity = intersectedNode.currentOpacity;
-									intersectedNode.material["emissive"]["setHex"](0);
+									intersectedNode.material.emissive.setHex(0);
 								}
 								intersectedNode = intersects[0].object;
 								intersectedNode.currentOpacity = intersectedNode.material.opacity;
 								intersectedNode.material.opacity += 0.1;
-								intersectedNode.material["emissive"]["setHex"](0x111111);
+								intersectedNode.material.emissive.setHex(0x111111);
 								updateSelectedNodeIndices(intersectedNode.indices);
 							}
 						}
 						else if(intersectedNode) {
 							intersectedNode.material.opacity = intersectedNode.currentOpacity;
-							intersectedNode.material["emissive"]["setHex"](0);
+							intersectedNode.material.emissive.setHex(0);
 							intersectedNode = null;
 							updateSelectedNodeIndices(0);
 						}
 					}
 
-					renderer["render"](scene,camera);
+					renderer.render(scene,camera);
 					cameraController.updateCamera(deltaTime);
 					setCameraPos(-camera.position.x,camera.position.z,camera.position.y);
 				});
