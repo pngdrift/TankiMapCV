@@ -4,8 +4,9 @@ SPDX-License-Identifier: Apache-2.0
 */
 package {
   import alternativa.math.*;
-  import alternativa.physics.collision.CollisionPrimitive;
+  import alternativa.physics.collision.CollisionShape;
   import alternativa.physics.collision.primitives.*;
+  import alternativa.physics.PhysicsMaterial;
 
   public class CollisionGeometryUtils {
 
@@ -13,10 +14,10 @@ package {
     private static const COLLISION_BOX:String = "collision-box";
     private static const COLLISION_TRIANGLE:String = "collision-triangle";
 
-    public static function parseAndAdd(mapXml:XML):Vector.<CollisionPrimitive> {
+    public static function parseAndAdd(mapXml:XML):Vector.<CollisionShape> {
       initMaterials();
-      var collisionPrimitives:Vector.<CollisionPrimitive> = new <CollisionPrimitive>[];
-      var collisionPrimitive:CollisionPrimitive;
+      var collisionPrimitives:Vector.<CollisionShape> = new <CollisionShape>[];
+      var collisionPrimitive:CollisionShape;
       for each(collisionPrimitive in parseCollisionGeometry(mapXml,COLLISION_PLANE)) {
         collisionPrimitives.push(collisionPrimitive);
       }
@@ -31,12 +32,12 @@ package {
 
     private static const halfSize:Vector3 = new Vector3();
 
-    private static function parseCollisionGeometry(mapXml:XML,collisionType:String):Vector.<CollisionPrimitive> {
+    private static function parseCollisionGeometry(mapXml:XML,collisionType:String):Vector.<CollisionShape> {
       var instancedMeshes:Object = {};
-      var collisionPrimitives:Vector.<CollisionPrimitive> = new <CollisionPrimitive>[];
+      var collisionPrimitives:Vector.<CollisionShape> = new Vector.<CollisionShape>();
       var collisionElements:XMLList = mapXml.elements("collision-geometry")[0].elements(collisionType);
       for each(var collisionElement:XML in collisionElements) {
-        var primitive:CollisionPrimitive;
+        var primitive:CollisionShape;
         var key:String;
         switch(collisionType) {
           case COLLISION_PLANE:
@@ -45,13 +46,13 @@ package {
             halfSize.x = 0.5 * width;
             halfSize.y = 0.5 * length;
             halfSize.z = 0;
-            primitive = new CollisionRect(halfSize,0xff);
+            primitive = new CollisionRect(halfSize,0xff,PhysicsMaterial.DEFAULT_MATERIAL);
             key = width + "x" + length;
             break;
           case COLLISION_BOX:
             readVector3(collisionElement.size,halfSize);
             halfSize.scale(0.5);
-            primitive = new CollisionBox(halfSize,0xff);
+            primitive = new CollisionBox(halfSize,0xff,PhysicsMaterial.DEFAULT_MATERIAL);
             key = halfSize.toString();
             break;
           case COLLISION_TRIANGLE:
@@ -61,11 +62,11 @@ package {
             readVector3(collisionElement.v0,v0);
             readVector3(collisionElement.v1,v1);
             readVector3(collisionElement.v2,v2);
-            primitive = new CollisionTriangle(v0,v1,v2,0xff);
+            primitive = new CollisionTriangle(v0,v1,v2,0xff,PhysicsMaterial.DEFAULT_MATERIAL);
             key = v0.toString() + v1.toString() + v2.toString();
             break;
         }
-        setCollisionPrimitiveOrientation(primitive,collisionElement);
+        setCollisionShapeOrientation(primitive,collisionElement);
         collisionPrimitives.push(primitive);
         if(!instancedMeshes[key]) {
           var geometry:*,material:*;
@@ -110,7 +111,7 @@ package {
     private static const rotation:Vector3 = new Vector3();
     private static const rotationMatrix:Matrix3 = new Matrix3();
 
-    private static function setCollisionPrimitiveOrientation(primitive:CollisionPrimitive,collisionElement:XML):void {
+    private static function setCollisionShapeOrientation(primitive:CollisionShape,collisionElement:XML):void {
       readVector3(collisionElement.position,position);
       readVector3(collisionElement.rotation,rotation);
       rotationMatrix.setRotationMatrix(rotation.x,rotation.y,rotation.z);

@@ -4,7 +4,7 @@ SPDX-License-Identifier: Apache-2.0
 */
 package {
     import alternativa.physics.collision.CollisionKdNode;
-    import alternativa.physics.collision.types.BoundBox;
+    import alternativa.physics.collision.types.AABB;
 
     public class KdNodesVisualization {
 
@@ -39,7 +39,7 @@ package {
 
         private function addNodesToScene():void {
             for each(var node:CollisionKdNode in nodes) {
-                var aabb:BoundBox = node.boundBox;
+                var aabb:AABB = node.boundBox;
                 var margin:int = 0;
                 var minX:Number = aabb.minX - margin;
                 var minY:Number = aabb.minY - margin;

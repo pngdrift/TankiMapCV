@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0
 	<fx:Script>
 		<![CDATA[
 			import alternativa.physics.collision.*;
-			import alternativa.physics.collision.types.BoundBox;
+			import alternativa.physics.collision.types.AABB;
 			import org.apache.royale.events.Event;
 			import org.apache.royale.file.beads.FileModel;
 			import org.apache.royale.html.SimpleAlert;
@@ -103,13 +103,13 @@ SPDX-License-Identifier: Apache-2.0
 					}
 				}
 				mapIdLabel.text = "Map file: " + fileModel.name;
-				var collisionPrimitives:Vector.<CollisionPrimitive> = CollisionGeometryUtils.parseAndAdd(mapXml);
+				var collisionPrimitives:Vector.<CollisionShape> = CollisionGeometryUtils.parseAndAdd(mapXml);
 				var kdTree:CollisionKdTree = new CollisionKdTree();
 				kdTree.createTree(collisionPrimitives);
 				kdNodesVisual.setRootNode(kdTree.rootNode);
 				kdNodesVisual.visible = showKdNodesCheckbox.selected;
 				onGrayTexturesChanged();
-				var mapBounds:BoundBox = kdTree.rootNode.boundBox;
+				var mapBounds:AABB = kdTree.rootNode.boundBox;
 				var camera:* = MapView.camera;
 				camera.position.x = -mapBounds.minX;
 				camera.position.y = mapBounds.minZ + 3000;
