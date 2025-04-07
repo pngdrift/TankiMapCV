@@ -21,7 +21,7 @@ package {
             }
             group = new THREE.Group();
             collectNode(rootNode);
-            TankiMapCV.instance.maxIndicesLabel.text = "Max indices in node: " + maxIndicesInNode;
+            TankiMapCV.instance.maxIndicesLabel.text = "Max indices count in node: " + maxIndicesInNode;
             addNodesToScene();
         }
 
@@ -73,8 +73,18 @@ package {
         }
 
         public function set visible(value:Boolean):void {
-            if(group)
+            if(group as THREE.Group)
                 group.visible = value;
+        }
+
+        public function set hideMinorKdNodes(value:Boolean):void {
+            if(group as THREE.Group) {
+                for each(var box:* in group.children) {
+                    if(box.indices < 15) {
+                        box.visible = !value;
+                    }
+                }
+            }
         }
 
         private function clearGroup():void {

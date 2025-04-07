@@ -11,7 +11,7 @@ package {
 		public static var scene:*;
 		public static var camera:*;
 
-		private static var inited:Boolean;
+		public static var inited:Boolean;
 
 		public static function initScene():void {
 			if(inited) {
@@ -48,7 +48,7 @@ package {
 			var cameraController:SimpleCameraController = new SimpleCameraController(camera);
 
 			var cameraPosLabel:Label = TankiMapCV.instance.cameraPosLabel;
-			function setCameraPos(x:int,y:int,z:int):void {
+			function updateCameraPosLabel(x:int,y:int,z:int):void {
 				cameraPosLabel.text = "Camera pos by x: " + x + " y: " + y + " z: " + z;
 			}
 
@@ -60,8 +60,8 @@ package {
 					pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
 				});
 			var selectedNodeIndicesLabel:Label = TankiMapCV.instance.selectedNodeIndicesLabel;
-			function updateSelectedNodeIndices(count:int):void {
-				selectedNodeIndicesLabel.text = "Indices in selected node: " + (count ? count : "");
+			function updateSelectedNodeIndicesLabel(count:int):void {
+				selectedNodeIndicesLabel.text = "Indices count in selected node: " + (count ? count : "");
 			}
 
 			var clock:* = new THREE.Clock();
@@ -75,7 +75,10 @@ package {
 
 					var kdNodesGroup:* = KdNodesVisualization.group;
 					if(kdNodesGroup && kdNodesGroup.children) {
-						var intersects:* = raycaster.intersectObjects(kdNodesGroup.children,false);
+						var intersects:Array = raycaster.intersectObjects(kdNodesGroup.children,false)
+							.filter(function(intersection:*):Boolean {
+									return intersection.object.visible;
+								});
 						if(intersects.length > 0) {
 							if(intersectedNode != intersects[0].object) {
 								if(intersectedNode) {
@@ -86,20 +89,20 @@ package {
 								intersectedNode.currentOpacity = intersectedNode.material.opacity;
 								intersectedNode.material.opacity += 0.1;
 								intersectedNode.material.emissive.setHex(0x111111);
-								updateSelectedNodeIndices(intersectedNode.indices);
+								updateSelectedNodeIndicesLabel(intersectedNode.indices);
 							}
 						}
 						else if(intersectedNode) {
 							intersectedNode.material.opacity = intersectedNode.currentOpacity;
 							intersectedNode.material.emissive.setHex(0);
 							intersectedNode = null;
-							updateSelectedNodeIndices(0);
+							updateSelectedNodeIndicesLabel(0);
 						}
 					}
 
 					renderer.render(scene,camera);
 					cameraController.updateCamera(deltaTime);
-					setCameraPos(-camera.position.x,camera.position.z,camera.position.y);
+					updateCameraPosLabel(-camera.position.x,camera.position.z,camera.position.y);
 				});
 		}
 	}

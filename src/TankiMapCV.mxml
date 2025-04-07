@@ -24,17 +24,18 @@ SPDX-License-Identifier: Apache-2.0
 					<js:TextButton html="Browse map" click="mapBrowser.browse()" id="browseMapButton"/>
 					<js:CheckBox text="Show CollisionKDNodes" change="onShowKDChanged()" id="showKdNodesCheckbox"/>
 					<js:CheckBox text="Gray collision textures" change="onGrayTexturesChanged()" id="grayTexturesCheckbox"/>
+					<js:CheckBox text="Hide minor CollisionKDNodes (indices count &lt; 15)" change="onHideMinorKDChanged()" id="hideMinorKdNodesCheckbox"/>
 				</js:HGroup>
-				<js:Label text="" id="mapIdLabel"/>
-				<js:Label text="" id="cameraPosLabel"/>
-				<js:Label text="" id="maxIndicesLabel"/>
-				<js:Label text="" id="selectedNodeIndicesLabel"/>
+				<js:Label id="mapIdLabel"/>
+				<js:Label id="cameraPosLabel"/>
+				<js:Label id="maxIndicesLabel"/>
+				<js:Label id="selectedNodeIndicesLabel"/>
 			</js:VGroup>
 			<js:TextButton text="GitHub" click="window.open('https://github.com/pngdrift/TankiMapCV')" style="position:absolute; right:0px;"/>
 		</js:View>
 	</js:initialView>
 
-	<fx:Style source="./_assets/style.css"/>	
+	<fx:Style source="./_assets/style.css"/>
 
 	<fx:Script>
 		<![CDATA[
@@ -56,10 +57,12 @@ SPDX-License-Identifier: Apache-2.0
 				favicon.setAttribute("type","image/png");
 				favicon.setAttribute("href","./_assets/favicon.png");
 				document.head.appendChild(favicon);
-
+			
 				window.addEventListener(KeyboardEvent.KEY_DOWN,this.onKeyDown);
 				browseMapButton.html = underlineChar(browseMapButton.html,"o");
 				showKdNodesCheckbox.selected = localStorage.getItem("showKdNodes");
+				hideMinorKdNodesCheckbox.selected = localStorage.getItem("hideMinorKdNodes");
+				hideMinorKdNodesCheckbox.visible = showKdNodesCheckbox.selected;
 				grayTexturesCheckbox.selected = localStorage.getItem("grayTextures");
 			}
 			
@@ -108,6 +111,7 @@ SPDX-License-Identifier: Apache-2.0
 				kdTree.createTree(collisionPrimitives);
 				kdNodesVisual.setRootNode(kdTree.rootNode);
 				kdNodesVisual.visible = showKdNodesCheckbox.selected;
+				onHideMinorKDChanged();
 				onGrayTexturesChanged();
 				var mapBounds:AABB = kdTree.rootNode.boundBox;
 				var camera:* = MapView.camera;
@@ -120,6 +124,7 @@ SPDX-License-Identifier: Apache-2.0
 			private function onShowKDChanged():void {
 				var value:Boolean = showKdNodesCheckbox.selected;
 				kdNodesVisual.visible = value;
+				hideMinorKdNodesCheckbox.visible = value;
 				if(value) {
 					localStorage.setItem("showKdNodes","true");
 				}
@@ -128,18 +133,31 @@ SPDX-License-Identifier: Apache-2.0
 				}
 			}
 			
+			private function onHideMinorKDChanged():void {
+				var value:Boolean = hideMinorKdNodesCheckbox.selected;
+				kdNodesVisual.hideMinorKdNodes = value;
+				if(value) {
+					localStorage.setItem("hideMinorKdNodes","true");
+				}
+				else {
+					localStorage.removeItem("hideMinorKdNodes");
+				}
+			}
+			
 			private function onGrayTexturesChanged():void {
 				var value:Boolean = grayTexturesCheckbox.selected;
-				var scene:* = MapView.scene;
-				for(var i:int = scene.children.length - 1; i >= 0; i--) {
-					var obj:* = scene.children[i];
-					var objName:String = obj.name;
-					if(objName.startsWith(("collision-"))) {
-						if(value) {
-							CollisionGeometryUtils.setGrayMaterial(obj);
-						}
-						else {
-							CollisionGeometryUtils.setColorMaterial(obj);
+				if (MapView.inited) {
+					var scene:* = MapView.scene;
+					for(var i:int = scene.children.length - 1; i >= 0; i--) {
+						var obj:* = scene.children[i];
+						var objName:String = obj.name;
+						if(objName.startsWith(("collision-"))) {
+							if(value) {
+								CollisionGeometryUtils.setGrayMaterial(obj);
+							}
+							else {
+								CollisionGeometryUtils.setColorMaterial(obj);
+							}
 						}
 					}
 				}
