@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 <js:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
 	xmlns:js="library://ns.apache.org/royale/basic"
+	xmlns:j="library://ns.apache.org/royale/jewel"
 	applicationComplete="onApplicationComplete(event)">
 
 	<fx:Declarations>
@@ -19,6 +20,7 @@ SPDX-License-Identifier: Apache-2.0
 
 	<js:initialView>
 		<js:View>
+			<j:DropZone id="dropZone" dropped="onFileDropped(event)" percentWidth="100" percentHeight="100"/>
 			<js:VGroup>
 				<js:HGroup>
 					<js:TextButton html="Browse map" click="mapBrowser.browse()" id="browseMapButton"/>
@@ -44,6 +46,7 @@ SPDX-License-Identifier: Apache-2.0
 			import org.apache.royale.events.Event;
 			import org.apache.royale.file.beads.FileModel;
 			import org.apache.royale.html.SimpleAlert;
+			import org.apache.royale.jewel.events.DroppedEvent;
 			
 			public static var instance:TankiMapCV;
 			
@@ -57,8 +60,8 @@ SPDX-License-Identifier: Apache-2.0
 				favicon.setAttribute("type","image/png");
 				favicon.setAttribute("href","./_assets/favicon.png");
 				document.head.appendChild(favicon);
-			
-				window.addEventListener(KeyboardEvent.KEY_DOWN,this.onKeyDown);
+				dropZone.style = "position:fixed;";
+				window.addEventListener(KeyboardEvent.KEY_DOWN,onKeyDown);
 				browseMapButton.html = underlineChar(browseMapButton.html,"o");
 				showKdNodesCheckbox.selected = localStorage.getItem("showKdNodes");
 				hideMinorKdNodesCheckbox.selected = localStorage.getItem("hideMinorKdNodes");
@@ -67,7 +70,7 @@ SPDX-License-Identifier: Apache-2.0
 			}
 			
 			private static function underlineChar(str:String,char:String):String {
-				return str.substr(0,str.indexOf(char)) + "<u>" + char + "</u>" + str.substr(str.indexOf("o") + 1);
+				return str.substr(0,str.indexOf(char)) + "<u>" + char + "</u>" + str.substr(str.indexOf(char) + 1);
 			}
 			
 			private function onKeyDown(event:KeyboardEvent):void {
@@ -78,17 +81,25 @@ SPDX-License-Identifier: Apache-2.0
 				}
 			}
 			
-			protected function modelChangedHandler(event:Event):void {
-				MapView.initScene();
+			private function modelChangedHandler(event:Event):void {
 				mapFileProxy.model.addEventListener("blobChanged",blobChangedHandler);
 				mapLoader.load();
 			}
 			
 			private function blobChangedHandler(event:Event):void {
 				var fileModel:FileModel = mapFileProxy.model as FileModel;
+				processMap(fileModel.name,fileModel.blob);
+			}
+			
+			private function onFileDropped(event:DroppedEvent):void {
+				var file:Object = event.data[0];
+				processMap(file.fileName,file.fileData);
+			}
+			
+			private function processMap(name:String,blob:Object):void {
 				var mapXml:XML;
 				try {
-					mapXml = new XML(fileModel.blob.toString("utf-8"));
+					mapXml = new XML(blob.toString("utf-8"));
 					if(mapXml.name() != "map") {
 						throw new Error("Loaded file isn't Tanki map");
 					}
@@ -97,6 +108,7 @@ SPDX-License-Identifier: Apache-2.0
 					SimpleAlert.show(err.message,this);
 					return;
 				}
+				MapView.initScene();
 				var scene:* = MapView.scene;
 				for(var i:int = scene.children.length - 1; i >= 0; i--) {
 					var obj:* = scene.children[i];
@@ -105,7 +117,7 @@ SPDX-License-Identifier: Apache-2.0
 						scene.remove(obj);
 					}
 				}
-				mapIdLabel.text = "Map file: " + fileModel.name;
+				mapIdLabel.text = "Map file: " + name;
 				var collisionPrimitives:Vector.<CollisionShape> = CollisionGeometryUtils.parseAndAdd(mapXml);
 				var kdTree:CollisionKdTree = new CollisionKdTree();
 				kdTree.createTree(collisionPrimitives);
@@ -146,7 +158,7 @@ SPDX-License-Identifier: Apache-2.0
 			
 			private function onGrayTexturesChanged():void {
 				var value:Boolean = grayTexturesCheckbox.selected;
-				if (MapView.inited) {
+				if(MapView.inited) {
 					var scene:* = MapView.scene;
 					for(var i:int = scene.children.length - 1; i >= 0; i--) {
 						var obj:* = scene.children[i];
