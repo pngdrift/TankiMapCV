@@ -10,7 +10,7 @@ package {
          * document.head.appendChild(script);
          * </inject_script>
          */
-        public function THREE() {
+        private function THREE() {
         }
 
         public static var AmbientLight:*;
