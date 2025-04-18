@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 <js:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
 	xmlns:js="library://ns.apache.org/royale/basic"
-	xmlns:j="library://ns.apache.org/royale/jewel"
+	xmlns:j="library://ns.apache.org/royale/jewel" xmlns:beads="beads.*"
 	applicationComplete="onApplicationComplete(event)">
 
 	<fx:Declarations>
@@ -15,7 +15,6 @@ SPDX-License-Identifier: Apache-2.0
 				<js:FileLoader id="mapLoader"/>
 			</js:beads>
 		</js:FileProxy>
-		<js:LocalStorage id="localStorage"/>
 	</fx:Declarations>
 
 	<js:initialView>
@@ -24,9 +23,21 @@ SPDX-License-Identifier: Apache-2.0
 			<js:VGroup>
 				<js:HGroup>
 					<js:TextButton html="Browse map" click="mapBrowser.browse()" id="browseMapButton"/>
-					<js:CheckBox text="Show CollisionKDNodes" change="onShowKDChanged()" id="showKdNodesCheckbox"/>
-					<js:CheckBox text="Gray collision textures" change="onGrayTexturesChanged()" id="grayTexturesCheckbox"/>
-					<js:CheckBox text="Hide minor CollisionKDNodes (indices count &lt; 15)" change="onHideMinorKDChanged()" id="hideMinorKdNodesCheckbox"/>
+					<js:CheckBox text="Show CollisionKDNodes" change="onShowKDChanged()" id="showKdNodesCheckbox">
+						<js:beads>
+							<beads:LocalStorageCheckBoxStateBead/>
+						</js:beads>
+					</js:CheckBox>
+					<js:CheckBox text="Gray collision textures" change="onGrayTexturesChanged()" id="grayTexturesCheckbox">
+						<js:beads>
+							<beads:LocalStorageCheckBoxStateBead/>
+						</js:beads>
+					</js:CheckBox>
+					<js:CheckBox text="Hide minor CollisionKDNodes (indices count &lt; 15)" change="onHideMinorKDChanged()" id="hideMinorKdNodesCheckbox">
+						<js:beads>
+							<beads:LocalStorageCheckBoxStateBead/>
+						</js:beads>
+					</js:CheckBox>
 				</js:HGroup>
 				<js:Label id="mapIdLabel"/>
 				<js:Label id="cameraPosLabel"/>
@@ -61,12 +72,9 @@ SPDX-License-Identifier: Apache-2.0
 				favicon.setAttribute("href","./_assets/favicon.png");
 				document.head.appendChild(favicon);
 				dropZone.style = "position:fixed;";
+				hideMinorKdNodesCheckbox.visible = showKdNodesCheckbox.selected;
 				window.addEventListener(KeyboardEvent.KEY_DOWN,onKeyDown);
 				browseMapButton.html = underlineChar(browseMapButton.html,"o");
-				showKdNodesCheckbox.selected = localStorage.getItem("showKdNodes");
-				hideMinorKdNodesCheckbox.selected = localStorage.getItem("hideMinorKdNodes");
-				hideMinorKdNodesCheckbox.visible = showKdNodesCheckbox.selected;
-				grayTexturesCheckbox.selected = localStorage.getItem("grayTextures");
 			}
 			
 			private static function underlineChar(str:String,char:String):String {
@@ -137,23 +145,11 @@ SPDX-License-Identifier: Apache-2.0
 				var value:Boolean = showKdNodesCheckbox.selected;
 				kdNodesVisual.visible = value;
 				hideMinorKdNodesCheckbox.visible = value;
-				if(value) {
-					localStorage.setItem("showKdNodes","true");
-				}
-				else {
-					localStorage.removeItem("showKdNodes");
-				}
 			}
 			
 			private function onHideMinorKDChanged():void {
 				var value:Boolean = hideMinorKdNodesCheckbox.selected;
 				kdNodesVisual.hideMinorKdNodes = value;
-				if(value) {
-					localStorage.setItem("hideMinorKdNodes","true");
-				}
-				else {
-					localStorage.removeItem("hideMinorKdNodes");
-				}
 			}
 			
 			private function onGrayTexturesChanged():void {
@@ -172,12 +168,6 @@ SPDX-License-Identifier: Apache-2.0
 							}
 						}
 					}
-				}
-				if(value) {
-					localStorage.setItem("grayTextures","true");
-				}
-				else {
-					localStorage.removeItem("grayTextures");
 				}
 			}
 		]]>
