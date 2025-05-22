@@ -32,6 +32,8 @@ package {
 
     private static const halfSize:Vector3 = new Vector3();
 
+    private static const triangleUv:Object = new THREE.BufferAttribute(new Float32Array([0,0,1,0,0,1]),2);
+
     private static function parseCollisionGeometry(mapXml:XML,collisionType:String):Vector.<CollisionShape> {
       var instancedMeshes:Object = {};
       var collisionPrimitives:Vector.<CollisionShape> = new Vector.<CollisionShape>();
@@ -86,7 +88,7 @@ package {
                     new THREE.Vector3(-v1.x,v1.z,v1.y),
                     new THREE.Vector3(-v2.x,v2.z,v2.y),
                   ]);
-              geometry.setAttribute("uv",new THREE.BufferAttribute(new Float32Array([0,0,1,0,0,1]),2));
+              geometry.setAttribute("uv",triangleUv);
               geometry.computeVertexNormals();
               material = triangleMaterial;
               break;

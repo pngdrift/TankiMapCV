@@ -121,7 +121,7 @@ SPDX-License-Identifier: Apache-2.0
 				for(var i:int = scene.children.length - 1; i >= 0; i--) {
 					var obj:* = scene.children[i];
 					var objName:String = obj.name;
-					if(objName.startsWith(("collision-"))) {
+					if(objName.startsWith("collision-")) {
 						scene.remove(obj);
 					}
 				}
@@ -139,6 +139,7 @@ SPDX-License-Identifier: Apache-2.0
 				camera.position.y = mapBounds.minZ + 3000;
 				camera.position.z = mapBounds.maxY;
 				camera.lookAt(new THREE.Vector3(-(mapBounds.minX + mapBounds.maxX) / 2),mapBounds.minZ,(mapBounds.minY + mapBounds.maxY) / 2);
+				kdTree.destroyTree();
 			}
 			
 			private function onShowKDChanged():void {
@@ -153,19 +154,20 @@ SPDX-License-Identifier: Apache-2.0
 			}
 			
 			private function onGrayTexturesChanged():void {
+				if(!MapView.inited) {
+					return;
+				}
 				var value:Boolean = grayTexturesCheckbox.selected;
-				if(MapView.inited) {
-					var scene:* = MapView.scene;
-					for(var i:int = scene.children.length - 1; i >= 0; i--) {
-						var obj:* = scene.children[i];
-						var objName:String = obj.name;
-						if(objName.startsWith(("collision-"))) {
-							if(value) {
-								CollisionGeometryUtils.setGrayMaterial(obj);
-							}
-							else {
-								CollisionGeometryUtils.setColorMaterial(obj);
-							}
+				var scene:* = MapView.scene;
+				for(var i:int = scene.children.length - 1; i >= 0; i--) {
+					var obj:* = scene.children[i];
+					var objName:String = obj.name;
+					if(objName.startsWith("collision-")) {
+						if(value) {
+							CollisionGeometryUtils.setGrayMaterial(obj);
+						}
+						else {
+							CollisionGeometryUtils.setColorMaterial(obj);
 						}
 					}
 				}

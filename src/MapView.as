@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 package {
 	import org.apache.royale.html.Label;
 	import org.apache.royale.events.MouseEvent;
+	import org.apache.royale.events.Event;
 
 	public class MapView {
 
@@ -39,7 +40,7 @@ package {
 			renderer.setSize(window.innerWidth,window.innerHeight);
 			document.body.appendChild(renderer.domElement);
 
-			window.addEventListener("resize",function():void {
+			window.addEventListener(Event.RESIZE,function():void {
 					camera.aspect = window.innerWidth / window.innerHeight;
 					camera.updateProjectionMatrix();
 					renderer.setSize(window.innerWidth,window.innerHeight);
